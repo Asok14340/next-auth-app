@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { verifyEmail } from "@/app/actions/auth";
 
-export default function VerifyEmail() {
+const VerifyEmailContent = () => {
     const searchParams = useSearchParams();
     const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
     const [message, setMessage] = useState("");
@@ -36,28 +36,36 @@ export default function VerifyEmail() {
     }, [token]);
 
     return (
+        <div className="text-center">
+            {status === "loading" && <p>Verifying your email...</p>}
+            {status === "success" && (
+                <>
+                    <h1 className="text-2xl font-bold text-green-600">✓ Email Verified!</h1>
+                    <p className="mt-4">{message}</p>
+                    <Link href="/login" className="mt-4 inline-block text-blue-600">
+                        Go to Login
+                    </Link>
+                </>
+            )}
+            {status === "error" && (
+                <>
+                    <h1 className="text-2xl font-bold text-red-600">✗ Verification Failed</h1>
+                    <p className="mt-4">{message}</p>
+                    <Link href="/login" className="mt-4 inline-block text-blue-600">
+                        Back to Login
+                    </Link>
+                </>
+            )}
+        </div>
+    );
+};
+
+export default function VerifyEmail() {
+    return (
         <div className="min-h-screen flex items-center justify-center">
-            <div className="text-center">
-                {status === "loading" && <p>Verifying your email...</p>}
-                {status === "success" && (
-                    <>
-                        <h1 className="text-2xl font-bold text-green-600">✓ Email Verified!</h1>
-                        <p className="mt-4">{message}</p>
-                        <Link href="/login" className="mt-4 inline-block text-blue-600">
-                            Go to Login
-                        </Link>
-                    </>
-                )}
-                {status === "error" && (
-                    <>
-                        <h1 className="text-2xl font-bold text-red-600">✗ Verification Failed</h1>
-                        <p className="mt-4">{message}</p>
-                        <Link href="/login" className="mt-4 inline-block text-blue-600">
-                            Back to Login
-                        </Link>
-                    </>
-                )}
-            </div>
+            <Suspense fallback={<p>Loading...</p>}>
+                <VerifyEmailContent />
+            </Suspense>
         </div>
     );
 }
